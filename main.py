@@ -1,28 +1,19 @@
-import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from user import User
+import json
+from user import DeclarativeBase
 
-connection = psycopg2.connect(database="pdb", user="puser",
-                              password="12345", host="151.248.113.116", port=5432)
+engine = create_engine('postgresql+psycopg2://puser:12345@151.248.113.116/pdb')
 
-with connection:
-    with connection.cursor() as cur:
-        try:
-            cur.execute("DELETE FROM users")
-            cur.execute()
-            cur.execute()
-            cur.execute()
-        except:
-            connection.rollback()
+# DeclarativeBase.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+session = Session()
 
-cursor = connection.cursor()
+# newUser = User(login="user10", password="user10p", name="user10name")
+# session.add(newUser)
+# session.commit()
 
-# cursor.execute("INSERT INTO users (login, password, name) VALUES (%s, %s, %s)",
-#                ("user2", "user2", "user2"))
-# connection.commit()
-
-cursor.execute("SELECT * FROM users")
-
-for currentUser in cursor:
-    print(currentUser)
-
-cursor.close()
-connection.close()
+for currentUser in session.query(User):
+    print(json.dumps(currentUser.as_dict()))
+    #print(currentUser.id, " ", currentUser.login, " ", currentUser.password, " ", currentUser.name)
